@@ -301,7 +301,7 @@ void loginAsAdmin(){
                 for(int j = i;j<20;j++){
                     candidateID[j] = candidateID[j+1];
                     for(int k = 0;k<strlen(candidateName[j+1]);k++){
-                       candidateName[j][k] = candidateName[j+1];
+                       candidateName[j][k] = candidateName[j+1][k];
                     }
                     votes[j] = votes[j+1];
                 }
@@ -366,7 +366,7 @@ void loginAsAdmin(){
         // Close the file 
         fclose(file); 
         }
-        printf("\nc has won the election");
+        
         introMenu();
 
     }
