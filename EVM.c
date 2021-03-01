@@ -14,11 +14,13 @@ void loginAsVoter();
 void loginAsAdmin();
 void introMenu();
 void getData();
+void addDataToVotersArray();
 void printCandidateAndID();
 char candidateName[20][50];
 int candidateID[20];
 int votes[20];
-char voterID[20][50];
+int voterIDArray[20];
+
 
 void printError(){
     printf("\nError ! Please try again..");
@@ -26,21 +28,32 @@ void printError(){
 }
 void loginAsVoter(){
     int voterId,votedCandidate;
+    int votedBefore = 0;
+
+    addDataToVotersArray();
     
     printf("Enter Voting id: ");
     scanf("%d",&voterId);
-    voterFile = fopen("evmVoterData.csv","a+");
+
+    for(int i = 0 ; i<20; i++){
+            if(voterId == voterIDArray[i]){
+               votedBefore = 1;
+            }
+        }
+
+        if(votedBefore == 0){
+           voterFile = fopen("evmVoterData.csv","a+");
     if(!voterFile){
        printf("Voters File not found ! Please try again..");
        introMenu();
     }
     else{
-        //TODO:Check whether the voter has voted before or not
-        printCandidateAndID();
-        printf("\nEnter Candidate ID to vote: ");
-        scanf("%d",&votedCandidate);
-        fprintf(voterFile, "%d, %d \n", voterId, votedCandidate);
-        fclose(voterFile);    
+           printCandidateAndID();
+           printf("\nEnter Candidate ID to vote: ");
+           scanf("%d",&votedCandidate);
+           fprintf(voterFile, "%d, %d \n", voterId, votedCandidate);
+           fclose(voterFile);  
+     
     }
     fp = fopen("evmData.csv","r");
     if(!fp){
@@ -68,6 +81,12 @@ void loginAsVoter(){
             char* value = strtok(buffer, ", "); 
   
             while (value) { 
+
+                if(column == 0){
+                    for(int i = 0;i<strlen(value);i++){
+                        candidateName[row-1][i] = value[i];
+                    }
+                }
                 
                 // Column 2 
                 if (column == 1) { 
@@ -89,7 +108,7 @@ void loginAsVoter(){
         fclose(fp); 
         }
 
-        resultFile = fopen("evmResults.csv","w");
+        resultFile = fopen("evmData.csv","w");
         if(!resultFile){
            printf("Result File Not Found \n");
            introMenu();
@@ -102,14 +121,50 @@ void loginAsVoter(){
             }
             
             for(int i = 0; i<20;i++){  
-              fprintf(resultFile, "%d, %d\n", candidateID[i], votes[i]);
+              fprintf(resultFile, "%s, %d, %d\n", candidateName[i], candidateID[i],votes[i]);
               
             }
             fclose(resultFile);        
         }
         printf("\nResponse Recorded successfully ! Thankyou for your vote each vote Counts\n"); 
-        introMenu();    
+        introMenu();
+        }
+    
+        
     }
+
+void addDataToVotersArray(){
+   fp = fopen("evmVoterData.csv","r");
+    if(!fp){
+       printf("\nFile Not Found ! Please try again\n");
+       introMenu(); 
+    }
+    else{
+            char buffer[1024]; 
+            int row = 0; 
+            int column = 0;
+
+        while (fgets(buffer, 1024, fp)) { 
+            column = 0; 
+            row++; 
+            if (row == 1) 
+                continue; 
+            char* value = strtok(buffer, ", "); 
+  
+            while (value) { 
+
+                if(column == 0){
+                    voterIDArray[row-1] = atoi(value);
+                } 
+                value = strtok(NULL, ", "); 
+                column++; 
+            } 
+        } 
+        // Close the file 
+        fclose(fp); 
+        }
+        
+}    
     
 void printCandidateAndID(){
     file = fopen("evmData.csv","r");
@@ -189,16 +244,70 @@ void loginAsAdmin(){
             int candidateIDtoRemove;
             printf("\nEnter Candidate Id to remove : ");
             scanf("%d",&candidateIDtoRemove);
-            file = fopen("evmData.csv","a+");
-            if(!file){
-                printf("\nFile not found ! Please try again..");
-                introMenu();
-            }
-            else{
+            fp = fopen("evmData.csv","r");
+    if(!fp){
+       printf("\nFailed To Open File ! Try again\n");
+       introMenu(); 
+    }
+    else{
+        
+       
+            char buffer[1024]; 
+            int row = 0; 
+            int column = 0;
 
-            }
+        while (fgets(buffer, 1024, fp)) { 
+            column = 0; 
+            row++;
             
-            introMenu();
+            // To avoid printing of column 
+            // names in file can be changed 
+            // according to need 
+            if (row == 1) 
+                continue; 
+  
+            // Splitting the data 
+            char* value = strtok(buffer, ", "); 
+  
+            while (value) { 
+
+                if(column == 0){
+                    for(int i = 0;i<strlen(value);i++){
+                        candidateName[row-1][i] = value[i];
+                    }
+                }
+                
+                // Column 2 
+                if (column == 1) { 
+                    candidateID[row-1] = atoi(value);
+                    
+                } 
+                // Column 3 
+                if (column == 2) { 
+                    if(value!=NULL){
+                    votes[row-1] = atoi(value);
+                    
+                    }    
+                }  
+                value = strtok(NULL, ", "); 
+                column++; 
+            } 
+        } 
+        // Close the file 
+        fclose(fp); 
+        }
+        for(int i = 0;i<20;i++){
+            if(candidateID[i]==candidateIDtoRemove){
+                for(int j = i;j<20;j++){
+                    candidateID[j] = candidateID[j+1];
+                    for(int k = 0;k<strlen(candidateName[j+1]);k++){
+                       candidateName[j][k] = candidateName[j+1];
+                    }
+                    votes[j] = votes[j+1];
+                }
+            }
+        }
+
                 
         }else{
             printError();
@@ -279,7 +388,6 @@ void introMenu(){
     }else{
        exit(0);
     }
-    
 
 }
 
