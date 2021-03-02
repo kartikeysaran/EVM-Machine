@@ -6,6 +6,7 @@ FILE *file;
 FILE *voterFile;
 FILE *fp;
 FILE *resultFile;
+const int candidateSize = 5;
 
 
 
@@ -16,9 +17,9 @@ void introMenu();
 void getData();
 void addDataToVotersArray();
 void printCandidateAndID();
-char candidateName[20][50];
-int candidateID[20];
-int votes[20];
+char candidateName[candidateSize][50]; // Change the variable a/c
+int candidateID[candidateSize]; // Change the variable a/c
+int votes[candidateSize]; // Change the variable a/c
 int voterIDArray[20];
 
 
@@ -43,11 +44,11 @@ void loginAsVoter(){
 
         if(votedBefore == 0){
            voterFile = fopen("evmVoterData.csv","a+");
-    if(!voterFile){
-       printf("Voters File not found ! Please try again..");
-       introMenu();
-    }
-    else{
+           if(!voterFile){
+            printf("Voters File not found ! Please try again..");
+            introMenu();
+            }
+           else{
            printCandidateAndID();
            printf("\nEnter Candidate ID to vote: ");
            scanf("%d",&votedCandidate);
@@ -57,7 +58,7 @@ void loginAsVoter(){
     }
     fp = fopen("evmData.csv","r");
     if(!fp){
-       
+       printf("\nFile Not Found ! \n");
        introMenu(); 
     }
     else{
@@ -70,12 +71,9 @@ void loginAsVoter(){
         while (fgets(buffer, 1024, fp)) { 
             column = 0; 
             row++;
-            
-            // To avoid printing of column 
-            // names in file can be changed 
-            // according to need 
-            if (row == 1) 
-                continue; 
+
+            if(row==1)
+              continue; 
   
             // Splitting the data 
             char* value = strtok(buffer, ", "); 
@@ -84,21 +82,25 @@ void loginAsVoter(){
 
                 if(column == 0){
                     for(int i = 0;i<strlen(value);i++){
-                        candidateName[row-1][i] = value[i];
+                            candidateName[row-1][i] = value[i];
                     }
                 }
                 
                 // Column 2 
                 if (column == 1) { 
-                    candidateID[row-1] = atoi(value);
+                    
+                         candidateID[row-1] = atoi(value);
+                    
+                    
                     
                 } 
                 // Column 3 
                 if (column == 2) { 
-                    if(value!=NULL){
-                    votes[row-1] = atoi(value);
                     
-                    }    
+                        
+                               votes[row-1] = atoi(value);
+                        
+                        
                 }  
                 value = strtok(NULL, ", "); 
                 column++; 
@@ -114,20 +116,27 @@ void loginAsVoter(){
            introMenu();
         }else{
             
-            for(int i = 0;i<20;i++){
+            for(int i = 0;i<candidateSize;i++){
                 if(candidateID[i]==votedCandidate){
                     votes[i] = votes[i]+1;
                 }
             }
             
-            for(int i = 0; i<20;i++){  
-              fprintf(resultFile, "%s, %d, %d\n", candidateName[i], candidateID[i],votes[i]);
+            for(int i = 0; i<candidateSize;i++){  
+                if(candidateName[i]!=NULL && candidateName[i]!= ""){
+                   fprintf(resultFile, "%s, %d, %d\n", candidateName[i], candidateID[i],votes[i]);
+                }
+              
               
             }
             fclose(resultFile);        
         }
         printf("\nResponse Recorded successfully ! Thankyou for your vote each vote Counts\n"); 
         introMenu();
+        }
+        else{
+            printf("Already Voted !");
+            introMenu();
         }
     
         
@@ -185,8 +194,6 @@ void printCandidateAndID(){
             // To avoid printing of column 
             // names in file can be changed 
             // according to need 
-            if (row == 1) 
-                continue; 
   
             // Splitting the data 
             char* value = strtok(buffer, ", "); 
@@ -195,13 +202,14 @@ void printCandidateAndID(){
                 // Column 1 
                 if (column == 0) { 
                     printf("Candidate Name :"); 
+                    printf("%s",value);
                 } 
   
                 // Column 2 
                 if (column == 1) { 
                     printf("\tCandidate ID :"); 
-                } 
-                printf("%s", value); 
+                    printf("%s",value);
+                }  
                 value = strtok(NULL, ", "); 
                 column++; 
             } 
@@ -262,9 +270,7 @@ void loginAsAdmin(){
             
             // To avoid printing of column 
             // names in file can be changed 
-            // according to need 
-            if (row == 1) 
-                continue; 
+             
   
             // Splitting the data 
             char* value = strtok(buffer, ", "); 
@@ -331,17 +337,17 @@ void loginAsAdmin(){
             // To avoid printing of column 
             // names in file can be changed 
             // according to need 
-            if (row == 1) 
-                continue; 
+             
   
             // Splitting the data 
             char* value = strtok(buffer, ", "); 
   
             while (value) { 
                 int candidateId;
+
                 // Column 1 
                 if (column == 0) { 
-                    printf("Candidate Name :"); 
+                    printf("Candidate Name :");
                 } 
   
                 // Column 2 
